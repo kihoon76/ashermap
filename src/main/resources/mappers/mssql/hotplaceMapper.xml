@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mappers.mssql.hotplaceMapper">
+
+	<select id="selectGuGun" resultType="string" parameterType="string">
+		select concat(code, ',"', name, '"') 
+		  from (
+				select distinct [시군구코드] as code,[시군구명] as name 
+				  from [지번주소].[dbo].[PNU10] 
+				 where [시도코드] = #{si}
+				   and [시군구명] != ''
+			   ) t1
+	      order by name
+	</select>
+	
+	<select id="selectRegionName" resultType="string" parameterType="Address">
+		select concat(code, ',"', name, '"') 
+		  from (
+				select distinct [읍면동코드] as code, [읍면동명] as name 
+				  from [지번주소].[dbo].[PNU10] 
+				 where [시도코드] = #{si}
+				   and [시군구코드] = #{gugun}
+				   and [읍면동명] != ''
+			   ) t1
+	      order by name
+	</select>
+	
+	<select id="selectAddress" resultType="string" parameterType="Address">
+		<if test='type == "N"'>
+		select concat('"',[PNU], '","', [시도명], ' ', [시군구명], ' ', [읍면동명], ' ', [리명], <if test="san == '2'">' 산',</if> ' ', [본번숫자], '-', [부번숫자], '",',  [위도], ',', [경도], ',', [극북], ',', [극서]) 
+		</if>
+   		  from (
+   		  		<if test='type == "N"'>
+   		  		select [PNU],[필지구분코드],[본번숫자],[부번숫자],[시도명],[시군구명],[읍면동명],[리명],[위도],[경도],[극서],[극북]
+   		  		</if>
+				  from [지번주소].[dbo].[전국지번통합]  
+			     where [시도코드] = #{si}
+			       and [시군구코드] = #{gugun}
+			       and [읍면동코드] = #{region}
+			       <if test='type == "N"'>
+			       and [필지구분코드] = #{san}
+			       <if test='beonjiF != ""'>
+			       and [본번숫자]= #{beonjiF}
+			       </if>
+			       <if test='beonjiS != ""'>
+			       and [부번숫자]= #{beonjiS}
+			       </if>
+			       </if>
+			       and [위도] is not null
+			    ) tb1
+	</select>
+	
+	<select id="selectLocationBounds" resultType="string" parameterType="hashmap">
+		<!-- 
+		select concat(극서 , '|', 극남,  '|', 극동, '|', 극북, '|', '[{"type":0, "value":50, "colorV":', case when PNU존재여부='Y' then round(rand(convert(varbinary, newid()))*100, 2) else 0 end, '}]')
+          from [좌표계].[dbo].[좌표계]
+         where 레벨 = #{level}
+           and 극서  between convert(float, #{swx}) and convert(float, #{nex})
+           and 극동  between convert(float, #{swx}) and convert(float, #{nex}) 
+           and 극남  between convert(float, #{swy}) and convert(float, #{ney})
+           and 극북  between convert(float, #{swy}) and convert(float, #{ney})
+         order by 극서 asc
+        -->
+          
+        with tmp as
+		(
+		   select 
+		      a.극서, a.극남, a.극동, a.극북, b.공시지가
+		   from 
+		      좌표계.dbo.좌표계13_하위 a with (nolock, INDEX(IX_좌표계13_하위_1))
+		      inner join Ranking.dbo.공시지가 b with (nolock, INDEX(PK_공시지가)) on (b.좌표계13_하위_고유번호=a.고유번호 and b.기준년월=#{year})
+		   where a.레벨=#{level}
+		     and a.극서 >= convert(float, #{swx})
+		     and a.극동 <![CDATA[<=]]> convert(float, #{nex})
+		     and a.극남 >= convert(float, #{swy})
+		     and a.극북 <![CDATA[<=]]> convert(float, #{ney})
+		)
+		select concat(a.극서 , '|', a.극남,  '|', a.극동, '|', a.극북, '|', '[{"type":0, "value":',  공시지가, ', "colorV":',convert(int, case when (공시지가-convert(int, min지가))/convert(int, gbn) > 950 then ((공시지가-convert(int, min지가))/convert(int, gbn)*90/100) + convert(int, rnk * convert(float, 1020)/max(rnk) over ()) *10/100 else ((공시지가-convert(int, min지가))/convert(int, gbn)*10/100) + convert(int, rnk * convert(float, 1020)/max(rnk) over ())*90/100 end), ', "maxV":', max지가, ', "minV":', min지가 , '}]') 
+		  from (
+				select a.*, (max지가-min지가)/1020 [gbn] 
+				  from (
+						select a.*,  max(공시지가) over () [max지가], min(공시지가) over () [min지가], dense_rank() over (order by 공시지가) [rnk]
+						  from tmp a
+						) a
+				) a
+		 order by a.극서 asc
+         
+	</select>
+	
+	<select id="selectGongsiBounds" resultType="string" parameterType="hashmap">
+	
+	</select>
+</mapper>
+<!-- 
+		select 
+   a.극서, a.극동, a.극남, a.극북, b.공시지가
+   from 
+   좌표계.dbo.좌표계13_하위 a
+   inner join Ranking.dbo.공시지가 b on (b.좌표계13_하위_고유번호=a.고유번호 and b.기준년월='201701')
+   where 
+   a.레벨=10 and 
+   a.극서 >= 129.1 and 
+   a.극동 <= 129.2 and 
+   a.극남 >= 35.9 and 
+   a.극북 <= 36.0
+   OPTION (TABLE HINT(a, INDEX(IX_좌표계13_하위_1)), TABLE HINT(b, INDEX(PK_공시지가)))
+
+
+
+
+
+
+
+
+ -->

@@ -1,0 +1,19 @@
+<table class="table table-bordered">
+	<tbody>
+		{{#each addresses as |addr|}}
+		<tr>
+			<td>
+			{{addr.[1]}}
+			</td>
+			<td>
+				<div class="funkyradio">
+        		<div class="funkyradio-info">
+					<input type="radio" name="{{../rdoId}}" id="{{../rdoId}}{{@index}}" data-lat="{{addr.[2]}}" data-lng="{{addr.[3]}}" data-sw="{{addr.[4]}}" data-ne="{{addr.[5]}}" data-address="{{addr.[1]}}"/>
+ 					<label for="{{../rdoId}}{{@index}}">선택</label>
+		        </div>
+				</div>
+			</td>
+		</tr>
+		{{/each}}
+	</tbody>
+</table>
