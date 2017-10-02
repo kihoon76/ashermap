@@ -49,14 +49,7 @@
 <body data-mtype="<c:out value='${mType}' />" data-url="${fn:substring(url, 0, fn:length(url) - fn:length(uri))}${req.contextPath}/">
 <div id="map" data-vender="naver">
 	<div class="map-buttons" id="mapButtons"></div>
-	<div id="dvNews" class="layer-popup" style="width:600px; height:50px">
-		<ul id="newsTicker" class="ticker">
-			<li><a href="">도시재생 사업(사상스마트시티) 실시계획인가, 부산시, 201707.10</a></li>
-      		<li><a href="">도시재생 사업(사상스마트시티) 실시계획인가, 부산시, 201707.10</a></li>
-      		<li><a href="">도시재생 사업(사상스마트시티) 실시계획인가, 부산시, 201707.10</a></li>
-      		<li><a href="">도시재생 사업(사상스마트시티) 실시계획인가, 부산시, 201707.10</a></li>
-		</ul>
-	</div>
+
 	<div id="dvAddrSearch" class="layer-popup" style="width:600px; height:810px"></div>
 	<div id="dvInfo"       class="layer-popup" style="width:600px; height:800px"></div>
 	<div id="dvSalesView"  class="layer-popup" style="width:250px; height:330px"></div>
@@ -96,18 +89,18 @@
 <script type="text/javascript" src="/resources/chart.js/2.5.0/dist/Chart.min.js"></script>
 
 <script type="text/javascript" src="/resources/js/plugins/loading/waitMe.min.js"></script>
-<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?clientId=SgnlyXnzstmDsYDhele7&submodules=visualization"></script>
+<script type="text/javascript">
+var map;
+function initMap() {
+  map = new google.maps.Map(document.getElementById('map'), {
+    center: {lat: 32.045589, lng: 34.876579},
+    zoom: 8
+  });
+}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCtzRob_ePM5RTujtBxE6w7W1tjbTS5mzw&callback=initMap&language=ko&region=KO" async defer></script>
 
-<script type="text/javascript" src="/resources/js/map/map-core.js"></script>
+<!--  <script type="text/javascript" src="/resources/js/map/map-core.js"></script>-->
 <sitemesh:write property="page.script" />
-<%--<c:choose>
-<c:when test="${mType eq 'heatmap'}">
-<script type="text/javascript" src="/resources/js/map/map-heatmap.js"></script>
-</c:when>
-<c:when test="${mType eq 'dotmap'}">
-<script type="text/javascript" src="/resources/js/map/map-dotmap.js"></script>
-</c:when>
-<c:otherwise></c:otherwise>
-</c:choose>--%>
 </body>
 </html>

@@ -14,12 +14,12 @@ public class SampleDaoImpl implements SampleDao {
 
 	private final static String namespace = "mappers.mssql.sampleMapper";
 	
-	@Resource(name = "msSqlSession")
-	SqlSession msSqlSession;
+	@Resource(name = "mySqlSession")
+	SqlSession mySqlSession;
 
 	@Override
 	public List<String> selectSample(String level) {
-		List<String> result = msSqlSession.selectList(namespace + ".selectSample", level);
+		List<String> result = mySqlSession.selectList(namespace + ".selectSample", level);
 	
 		return result;
 	}
